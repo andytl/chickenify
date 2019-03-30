@@ -1,0 +1,28 @@
+{
+    "manifest_version": 2,
+    "name": "Chickenify",
+    "version": "1.0",
+
+    "description": "Turns the web into chicken",
+
+    "background": {
+        "page": "background-page.html"
+    },
+
+    "web_accessible_resources": [
+        "images/chicken.png"
+    ],
+
+    "icons": {
+        "48": "icons/chicken-48.png"
+    },
+
+    "permissions": [
+        "activeTab"
+    ],
+
+    "browser_action": {
+        "default_icon": "icons/chicken-32.png",
+        "default_title": "Chickenify"
+    }
+}
