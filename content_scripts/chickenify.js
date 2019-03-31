@@ -1,19 +1,4 @@
 (function () {
-    /**
-     * Check and set a global guard variable.
-     * If this content script is injected into the same page again,
-     * it will do nothing next time.
-     */
-    if (window.hasRun) {
-        return;
-    }
-    window.hasRun = true;
-/*
-    let supportedTags = new Set(["div", "body", "span", "nav", "ul", "li",
-        "ol", "header", "a", "p", "main", "footer", "section", "strong",
-        "table", "tr", "td", "th", "thead", "tbody", "h1", "h2", "h3", "h4",
-        "link", "label", "form", "input", "button", "textarea"]);
-*/
     function getRandomInt(max) {
         return Math.floor(Math.random() * (max));
     }
@@ -23,12 +8,13 @@
     }
 
     function prettyChicken(text) {
-        let chicken = "Chicken";
-        let countChickens = text.length / chicken.length;
+        let textTrimLength = text.replace(/\s+/," ").length;
+        let chicken = "Chicken ";
+        let countChickens = textTrimLength / chicken.length;
         if (countChickens < 1) {
             return chicken.substr(0, Math.ceil(countChickens * chicken.length));
         } else {
-            return (chicken + " ").repeat(Math.floor(countChickens)).trim();
+            return chicken.repeat(Math.floor(countChickens)).trim();
         }
     }
 
@@ -43,6 +29,7 @@
                     //log(`chickenified: ${node.data.replace(/\s+/," ").substring(0, Math.max(node.data.length, 60))}`);
                     node.data = prettyChicken(node.data);
                 }
+            } else if (node.nodeType === 8) { // ignore comments
             } else if (node.nodeType === 1) {
                 //log("at " + path);
                 let randomIdx = getRandomInt(params.chickenURLs.length);
@@ -53,6 +40,7 @@
                     //log(`at ${path}, replacing bg image, image was ${nodeStyle.backgroundImage}`);
                     let imgH = nodeStyle.height, imgW = nodeStyle.width;
                     node.style.backgroundImage = `url("${params.chickenURLs[randomIdx]}")`;
+                    node.style.backgroundSize = "contain"; // contain or cover
                     node.height = imgH;
                     node.width = imgW;
                 }
@@ -78,6 +66,7 @@
             }
         } catch (e) {
             log(`Exception at  ${path} - ${node.name}, ${e}`);
+            throw e;
         }
     }
 
@@ -86,12 +75,18 @@
     }
 
     browser.runtime.onMessage.addListener((message) => {
-        //TODO can we return something?
-        if (message.command === "chickenify") {
-            chickenify(message.chickenURLs);
-        } else {
-            log("bad message");
-        }
+        return new Promise((resolve, reject) => {
+            if (message.command === "chickenify") {
+                try {
+                    chickenify(message.chickenURLs);
+                    resolve("Chickenify worked");
+                } catch (e) {
+                    reject(e);
+                }
+            } else {
+                reject(Error("bad message"));
+            }
+        });
     });
 
 })();
