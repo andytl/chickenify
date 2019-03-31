@@ -18,9 +18,6 @@
         }
     }
 
-    /**
-     * Remove every beast from the page.
-     */
     function chickenifyNode(path, node, params) {
         //log(path);
         try {
